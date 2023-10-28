@@ -2,6 +2,7 @@ package gobwasv1
 
 import (
 	"context"
+	"net"
 	"net/http"
 	"time"
 
@@ -55,6 +56,10 @@ func (br *Broker) Serve(ctx context.Context, addr string) error {
 		if err != nil {
 			log.Error().Err(err).Msg("failed to upgrade connection")
 			return
+		}
+
+		if tc, ok := conn.(*net.TCPConn); ok {
+			tc.SetNoDelay(true)
 		}
 
 		wc := &wsClient{
