@@ -8,6 +8,7 @@ import (
 
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
+	"github.com/spy16/ticktock/brokers/gobwasv1"
 	"github.com/spy16/ticktock/brokers/gorillav1"
 	"github.com/spy16/ticktock/brokers/gorillav2"
 	"github.com/spy16/ticktock/ticker"
@@ -90,6 +91,10 @@ func setupServerAndPublisher(ctx context.Context, serverType, brokerType string)
 		if err != nil {
 			log.Fatal().Err(err).Msg("failed to create server")
 		}
+		return srv, srv
+
+	case "gobwasv1":
+		srv := gobwasv1.New()
 		return srv, srv
 
 	default:
