@@ -5,7 +5,7 @@ Build a pub/sub ticker data streaming broker.
 - Each topic represents an instrument.
 - Client connects via HTTP and connection upgrades to Websocket.
 - Client can send a JSON-encoded TextMessage (e.g., `{"m": 0, "i": [76557, 7978]}` to subscribe to instruments).
-- `m` stands for `mode` (Supported: LTP = 0, LTP+Quote = 1, Full = 2, Unsubcribe = 3) 
+- `m` stands for `mode` (Supported: Unsubcribe = 0, LTP = 1, LTP+Quote = 2, Full = 3) 
 
 ![Architecture](./arch.png)
 
