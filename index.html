@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Websocket Demo</title>
+</head>
+
+<body>
+
+    <span id="tick">Opening...</span>
+
+    <input type="text" id="instruments" />
+    <button id="send" onclick="send()">Subscribe</button>
+    <button id="send" onclick="stop()">Stop</button>
+</body>
+
+<script>
+
+    let ws;
+    function send() {
+        var instruments = document.getElementById("instruments").value.split(",").map(function (item) {
+            return parseInt(item.trim());
+        });
+        ws.send(JSON.stringify({ "m": 0, "i": instruments }));
+    }
+
+    function stop() {
+        ws.close();
+    }
+
+
+    window.onload = function () {
+        let count = 0
+        ws = new WebSocket("ws://localhost:8080");
+        ws.onopen = function () {
+            document.getElementById("tick").innerHTML = "Connection opened";
+        };
+        ws.onmessage = function (evt) {
+            count++
+            document.getElementById("tick").innerHTML = count.toString();
+        };
+        ws.onclose = function () {
+            document.getElementById("tick").innerHTML = "Connection closed";
+        };
+    }
+</script>
+
+</html>

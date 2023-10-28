@@ -1,0 +1,26 @@
+version: "3.7"
+
+services:
+  ticktock-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+      - "6060:6060"
+
+  ticktock-client1:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["/app/ticktock", "client", "-c=1000", "--addr=ws://ticktock-server:8080"]
+    depends_on:
+      - ticktock-server
+
+  ticktock-client2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["/app/ticktock", "client", "-c=50000", "--addr=ws://ticktock-server:8080"]
+    depends_on:
+      - ticktock-server
