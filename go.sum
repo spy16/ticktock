@@ -1,3 +1,7 @@
+github.com/antlabs/quickws v0.1.7 h1:Gt0yT9ZG2nP47zHhB85oeq57Zf2iNMDGpQUn7ru2puY=
+github.com/antlabs/quickws v0.1.7/go.mod h1:Z0cSsS7294etkNnhPYEbTx54Kwe7TXfpojX/36OzGrU=
+github.com/antlabs/wsutil v0.1.2 h1:8H6E0eMJ2Wp0qi9YGDeyG3DlIfIZncw2NSScC5bYSBQ=
+github.com/antlabs/wsutil v0.1.2/go.mod h1:7ec5eUM7nmKW+Oi6F1I58iatOeL9k+yIsfOh1zh910g=
 github.com/coreos/go-systemd/v22 v22.5.0/go.mod h1:Y58oyj3AT4RCenI/lSvhwexgC+NSVTIJ3seZv2GcEnc=
 github.com/cpuguy83/go-md2man/v2 v2.0.2/go.mod h1:tgQtvFlXSQOSOSIRvRPT7W67SCa46tRHOmNcaadrF8o=
 github.com/gobwas/httphead v0.1.0 h1:exrUm0f4YX0L7EBwZHuCF4GDp8aJfVeBrlLQrs6NqWU=

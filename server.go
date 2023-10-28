@@ -11,6 +11,7 @@ import (
 	"github.com/spy16/ticktock/brokers/gobwasv1"
 	"github.com/spy16/ticktock/brokers/gorillav1"
 	"github.com/spy16/ticktock/brokers/gorillav2"
+	"github.com/spy16/ticktock/brokers/quickwsv1"
 	"github.com/spy16/ticktock/ticker"
 	"github.com/spy16/ticktock/utils"
 )
@@ -95,6 +96,10 @@ func setupServerAndPublisher(ctx context.Context, serverType, brokerType string)
 
 	case "gobwasv1":
 		srv := gobwasv1.New()
+		return srv, srv
+
+	case "quickwsv1":
+		srv := quickwsv1.New()
 		return srv, srv
 
 	default:

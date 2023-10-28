@@ -61,7 +61,7 @@ func (br *Broker) Serve(ctx context.Context, addr string) error {
 			br:     br,
 			conn:   conn,
 			done:   make(chan struct{}),
-			writes: make(chan []byte, 1024),
+			writes: make(chan []byte, 10000),
 		}
 		go wc.Run(ctx)
 	}))
@@ -82,5 +82,14 @@ func (br *Broker) updateSubs(ctx context.Context, wc *wsClient, req ticker.Reque
 			}
 			br.topics[instr][wc] = req.Mode
 		}
+	}
+}
+
+func (br *Broker) removeSub(ctx context.Context, wc *wsClient) {
+	br.mu.Lock()
+	defer br.mu.Unlock()
+
+	for _, subs := range br.topics {
+		delete(subs, wc)
 	}
 }

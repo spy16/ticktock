@@ -34,7 +34,11 @@ func (wc *wsClient) EnqueuWrite(msg []byte) {
 
 func (wc *wsClient) Run(ctx context.Context) {
 	ctx, cancel := context.WithCancel(ctx)
-	defer cancel()
+	defer func() {
+		close(wc.done)
+		wc.br.removeSub(ctx, wc)
+		cancel()
+	}()
 
 	if err := wc.conn.SetReadDeadline(time.Now().Add(readTimeout)); err != nil {
 		log.Error().Err(err).Msg("failed to set read deadline")
@@ -46,8 +50,6 @@ func (wc *wsClient) Run(ctx context.Context) {
 	})
 
 	go wc.runReader(ctx, cancel)
-
-	defer close(wc.done)
 
 	for {
 		select {

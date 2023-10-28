@@ -3,6 +3,8 @@ import { check } from 'k6';
 
 import { randomIntBetween } from 'https://jslib.k6.io/k6-utils/1.2.0/index.js';
 
+const instruments = 10000;
+
 export default function () {
   const url = 'ws://localhost:8080';
 
@@ -18,11 +20,11 @@ export default function () {
     socket.setInterval(() => {
       socket.send(JSON.stringify({ 'm': 1, 'i': instrs }))
       instrs = [
-        randomIntBetween(1, 100),
-        randomIntBetween(1, 100),
-        randomIntBetween(1, 100),
-        randomIntBetween(1, 100),
-        randomIntBetween(1, 100),
+        randomIntBetween(1, instruments),
+        randomIntBetween(1, instruments),
+        randomIntBetween(1, instruments),
+        randomIntBetween(1, instruments),
+        randomIntBetween(1, instruments),
       ]
     }, 1000)
 

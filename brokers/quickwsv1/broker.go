@@ -1,11 +1,11 @@
-package gobwasv1
+package quickwsv1
 
 import (
 	"context"
 	"net/http"
 	"time"
 
-	"github.com/gobwas/ws"
+	"github.com/antlabs/quickws"
 	"github.com/rs/zerolog/log"
 	"github.com/spy16/ticktock/ticker"
 	"github.com/spy16/ticktock/utils"
@@ -20,7 +20,8 @@ func New() *Broker {
 }
 
 type Broker struct {
-	topics   map[int32]map[*wsClient]ticker.Mode
+	topics map[int32]map[*wsClient]ticker.Mode
+
 	requests chan brokerRequest
 	messages chan []ticker.Tick
 }
@@ -43,7 +44,6 @@ func (br *Broker) Publish(timeout time.Duration, ticks []ticker.Tick) error {
 	}
 }
 
-// Serve starts the broker server.
 func (br *Broker) Serve(ctx context.Context, addr string) error {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
@@ -51,19 +51,24 @@ func (br *Broker) Serve(ctx context.Context, addr string) error {
 	go br.runManagement(ctx, cancel)
 
 	return utils.ServeCtx(ctx, addr, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		conn, _, _, err := ws.UpgradeHTTP(r, w)
+		cl := &wsClient{
+			br:     br,
+			ctx:    ctx,
+			done:   make(chan struct{}),
+			writes: make(chan []byte, 1024),
+		}
+
+		c, err := quickws.Upgrade(w, r, quickws.WithServerReplyPing(),
+			quickws.WithServerCallback(cl),
+			quickws.WithServerReadTimeout(5*time.Second),
+		)
 		if err != nil {
 			log.Error().Err(err).Msg("failed to upgrade connection")
 			return
 		}
 
-		wc := &wsClient{
-			br:     br,
-			conn:   conn,
-			done:   make(chan struct{}),
-			writes: make(chan []byte, 10000),
-		}
-		go wc.Run(ctx)
+		cl.conn = c
+		go cl.Run(ctx)
 	}))
 }
 

@@ -38,6 +38,7 @@ type brokerRequest struct {
 	ticker.Request
 
 	Client *wsClient
+	Remove bool
 }
 
 // Publish publishes the given ticks to all subscribers.
@@ -69,7 +70,7 @@ func (br *Broker) Serve(ctx context.Context, addr string) error {
 			br:     br,
 			conn:   conn,
 			done:   make(chan struct{}),
-			writes: make(chan []byte, 1024),
+			writes: make(chan []byte, 10000),
 		}
 		go wc.Run(ctx)
 	}))
@@ -93,16 +94,22 @@ func (br *Broker) runManagement(ctx context.Context, cancel context.CancelFunc) 
 			}
 
 		case cmd := <-br.requests:
-			for _, instr := range cmd.Instruments {
-				if cmd.Mode == ticker.ModeNone {
-					if br.topics[instr] != nil {
-						delete(br.topics[instr], cmd.Client)
+			if cmd.Remove {
+				for _, instr := range cmd.Instruments {
+					delete(br.topics[instr], cmd.Client)
+				}
+			} else {
+				for _, instr := range cmd.Instruments {
+					if cmd.Mode == ticker.ModeNone {
+						if br.topics[instr] != nil {
+							delete(br.topics[instr], cmd.Client)
+						}
+					} else {
+						if br.topics[instr] == nil {
+							br.topics[instr] = make(map[*wsClient]ticker.Mode)
+						}
+						br.topics[instr][cmd.Client] = cmd.Mode
 					}
-				} else {
-					if br.topics[instr] == nil {
-						br.topics[instr] = make(map[*wsClient]ticker.Mode)
-					}
-					br.topics[instr][cmd.Client] = cmd.Mode
 				}
 			}
 		}
@@ -112,6 +119,13 @@ func (br *Broker) runManagement(ctx context.Context, cancel context.CancelFunc) 
 func (br *Broker) updateSubs(ctx context.Context, wc *wsClient, req ticker.Request) {
 	select {
 	case br.requests <- brokerRequest{Request: req, Client: wc}:
+	case <-ctx.Done():
+	}
+}
+
+func (br *Broker) removeSub(ctx context.Context, wc *wsClient) {
+	select {
+	case br.requests <- brokerRequest{Client: wc, Remove: true}:
 	case <-ctx.Done():
 	}
 }
