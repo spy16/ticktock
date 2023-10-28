@@ -11,6 +11,7 @@ import (
 	"github.com/spy16/ticktock/brokers/gobwasv1"
 	"github.com/spy16/ticktock/brokers/gorillav1"
 	"github.com/spy16/ticktock/brokers/gorillav2"
+	"github.com/spy16/ticktock/brokers/gorillav3"
 	"github.com/spy16/ticktock/brokers/quickwsv1"
 	"github.com/spy16/ticktock/ticker"
 	"github.com/spy16/ticktock/utils"
@@ -89,6 +90,13 @@ func setupServerAndPublisher(ctx context.Context, serverType, brokerType string)
 
 	case "gorillav2":
 		srv, err := gorillav2.New()
+		if err != nil {
+			log.Fatal().Err(err).Msg("failed to create server")
+		}
+		return srv, srv
+
+	case "gorillav3":
+		srv, err := gorillav3.New()
 		if err != nil {
 			log.Fatal().Err(err).Msg("failed to create server")
 		}
