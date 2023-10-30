@@ -8,6 +8,7 @@ require (
 	github.com/gorilla/websocket v1.5.0
 	github.com/paulbellamy/ratecounter v0.2.0
 	github.com/rs/zerolog v1.31.0
+	github.com/smallnest/epoller v1.1.0
 	github.com/spf13/cobra v1.7.0
 )
 

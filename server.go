@@ -9,6 +9,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"github.com/spy16/ticktock/brokers/gobwasv1"
+	"github.com/spy16/ticktock/brokers/gobwasv2"
 	"github.com/spy16/ticktock/brokers/gorillav1"
 	"github.com/spy16/ticktock/brokers/gorillav2"
 	"github.com/spy16/ticktock/brokers/gorillav3"
@@ -104,6 +105,10 @@ func setupServerAndPublisher(ctx context.Context, serverType, brokerType string)
 
 	case "gobwasv1":
 		srv := gobwasv1.New()
+		return srv, srv
+
+	case "gobwasv2":
+		srv := gobwasv2.New()
 		return srv, srv
 
 	case "quickwsv1":
