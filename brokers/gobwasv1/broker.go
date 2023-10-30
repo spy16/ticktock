@@ -52,7 +52,7 @@ func (br *Broker) Serve(ctx context.Context, addr string) error {
 	go br.runManagement(ctx, cancel)
 
 	return utils.ServeCtx(ctx, addr, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		conn, _, _, err := ws.UpgradeHTTP(r, w)
+		conn, rw, _, err := ws.UpgradeHTTP(r, w)
 		if err != nil {
 			log.Error().Err(err).Msg("failed to upgrade connection")
 			return
@@ -64,6 +64,7 @@ func (br *Broker) Serve(ctx context.Context, addr string) error {
 
 		wc := &wsClient{
 			br:     br,
+			rw:     rw,
 			conn:   conn,
 			done:   make(chan struct{}),
 			writes: make(chan []byte, 10000),

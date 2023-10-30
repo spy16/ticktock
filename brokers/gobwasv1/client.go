@@ -1,6 +1,7 @@
 package gobwasv1
 
 import (
+	"bufio"
 	"context"
 	"encoding/json"
 	"errors"
@@ -15,6 +16,7 @@ import (
 
 type wsClient struct {
 	br     *Broker
+	rw     *bufio.ReadWriter
 	done   chan struct{}
 	conn   net.Conn
 	writes chan []byte
@@ -36,6 +38,7 @@ func (wc *wsClient) Run(ctx context.Context) {
 		close(wc.done)
 		wc.br.removeSub(ctx, wc)
 		cancel()
+		_ = wc.conn.Close()
 	}()
 
 	go wc.runReader(ctx, cancel)
@@ -50,11 +53,7 @@ func (wc *wsClient) Run(ctx context.Context) {
 				return
 			}
 
-			if err := wsutil.WriteServerMessage(wc.conn, ws.OpBinary, msg); err != nil {
-				if errors.Is(err, syscall.EPIPE) {
-					return
-				}
-				log.Error().Err(err).Msg("failed to write message")
+			if kill := wc.write(msg); kill {
 				return
 			}
 		}
@@ -70,7 +69,7 @@ func (wc *wsClient) runReader(ctx context.Context, cancel context.CancelFunc) {
 			return
 
 		default:
-			msg, op, err := wsutil.ReadClientData(wc.conn)
+			msg, op, err := wsutil.ReadClientData(wc.rw)
 			if err != nil {
 				var closeErr wsutil.ClosedError
 				if errors.As(err, &closeErr) {
@@ -95,4 +94,18 @@ func (wc *wsClient) runReader(ctx context.Context, cancel context.CancelFunc) {
 			wc.br.updateSubs(ctx, wc, req)
 		}
 	}
+}
+
+func (wc *wsClient) write(data []byte) (kill bool) {
+	if err := wsutil.WriteServerMessage(wc.rw, ws.OpBinary, data); err != nil {
+		if !errors.Is(err, syscall.EPIPE) {
+			log.Error().Err(err).Msg("failed to write message")
+		}
+		return true
+	}
+	if err := wc.rw.Flush(); err != nil {
+		return true
+	}
+
+	return false
 }
